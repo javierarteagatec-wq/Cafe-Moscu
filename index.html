@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Café Admin — Control de Stock</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;500;600&display=swap');
@@ -20,6 +20,7 @@
     --warn:      #c8a03a;
     --danger:    #c85a3a;
     --radius:    10px;
+    --header-h:  56px;
   }
 
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -30,14 +31,16 @@
     color: var(--text);
     min-height: 100vh;
     font-size: 14px;
+    -webkit-tap-highlight-color: transparent;
+    overflow-x: hidden;
   }
 
   /* ── Header ── */
   header {
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    padding: 0 28px;
-    height: 60px;
+    padding: 0 16px;
+    height: var(--header-h);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -47,20 +50,29 @@
   }
   .logo {
     font-family: 'Playfair Display', serif;
-    font-size: 22px;
+    font-size: 19px;
     color: var(--accent2);
     letter-spacing: 0.02em;
+    white-space: nowrap;
   }
-  .logo span { color: var(--muted); font-size: 13px; font-family: 'Inter', sans-serif; font-weight: 300; margin-left: 10px; }
+  .logo span {
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    margin-left: 8px;
+    display: none; /* hidden on mobile */
+  }
+  @media(min-width: 600px) { .logo span { display: inline; } }
 
-  .header-actions { display: flex; gap: 10px; align-items: center; }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
 
   /* ── Buttons ── */
   .btn {
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     font-weight: 500;
-    padding: 8px 16px;
+    padding: 8px 14px;
     border-radius: var(--radius);
     border: none;
     cursor: pointer;
@@ -68,8 +80,11 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    min-height: 40px;
   }
-  .btn:active { transform: scale(.97); }
+  .btn:active { transform: scale(.96); }
   .btn-primary { background: var(--accent); color: #fff; }
   .btn-primary:hover { opacity: .88; }
   .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); }
@@ -77,20 +92,33 @@
   .btn-wa { background: #25D366; color: #fff; font-weight: 600; }
   .btn-wa:hover { opacity: .88; }
   .btn-danger { background: var(--danger); color: #fff; }
+  /* Icon-only button for small screens */
+  .btn-icon {
+    padding: 8px 10px;
+    font-size: 16px;
+  }
 
   /* ── Layout ── */
-  .main { max-width: 1280px; margin: 0 auto; padding: 28px 20px; }
+  .main { max-width: 1280px; margin: 0 auto; padding: 16px 12px; }
+  @media(min-width: 600px) { .main { padding: 24px 20px; } }
 
   /* ── Stats bar ── */
-  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 28px; }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  @media(min-width: 600px) { .stats { grid-template-columns: repeat(4, 1fr); gap: 14px; } }
+
   .stat-card {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 18px 20px;
+    padding: 14px 16px;
   }
-  .stat-label { color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 6px; }
-  .stat-value { font-size: 28px; font-weight: 600; line-height: 1; }
+  .stat-label { color: var(--muted); font-size: 10px; text-transform: uppercase; letter-spacing: .08em; margin-bottom: 4px; }
+  .stat-value { font-size: 26px; font-weight: 600; line-height: 1; }
   .stat-value.ok    { color: var(--ok); }
   .stat-value.warn  { color: var(--warn); }
   .stat-value.danger{ color: var(--danger); }
@@ -99,45 +127,54 @@
   /* ── Toolbar ── */
   .toolbar {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 8px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
     align-items: center;
   }
-  .search-wrap { position: relative; flex: 1; min-width: 180px; }
+  .search-wrap { position: relative; flex: 1; min-width: 140px; }
   .search-wrap input {
     width: 100%;
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
-    padding: 8px 12px 8px 34px;
-    font-size: 13px;
+    padding: 9px 12px 9px 34px;
+    font-size: 14px;
     outline: none;
     transition: border-color .15s;
+    min-height: 40px;
   }
   .search-wrap input:focus { border-color: var(--accent); }
-  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+  .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; font-size: 14px; }
 
   select.filter {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     color: var(--text);
-    padding: 8px 12px;
+    padding: 8px 10px;
     font-size: 13px;
     outline: none;
     cursor: pointer;
+    min-height: 40px;
   }
   select.filter:focus { border-color: var(--accent); }
   select.filter option { background: var(--card); }
 
   /* ── Category tabs ── */
+  .cat-tabs-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    margin-bottom: 16px;
+    padding-bottom: 4px;
+  }
+  .cat-tabs-wrap::-webkit-scrollbar { display: none; }
   .cat-tabs {
     display: flex;
     gap: 6px;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+    white-space: nowrap;
   }
   .cat-tab {
     padding: 6px 14px;
@@ -149,68 +186,84 @@
     cursor: pointer;
     transition: all .15s;
     font-family: 'Inter', sans-serif;
+    white-space: nowrap;
+    flex-shrink: 0;
+    min-height: 32px;
+    touch-action: manipulation;
   }
   .cat-tab:hover { color: var(--text); border-color: var(--accent); }
   .cat-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
 
-  /* ── Table ── */
+  /* ── Table wrapper — horizontal scroll on mobile ── */
   .table-wrap {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     overflow: hidden;
   }
-  table { width: 100%; border-collapse: collapse; }
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .table-scroll::-webkit-scrollbar { height: 4px; }
+  .table-scroll::-webkit-scrollbar-track { background: transparent; }
+  .table-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+  table { width: 100%; border-collapse: collapse; min-width: 600px; }
   thead th {
     background: var(--surface);
-    padding: 12px 14px;
+    padding: 11px 12px;
     text-align: left;
-    font-size: 11px;
+    font-size: 10px;
     text-transform: uppercase;
     letter-spacing: .07em;
     color: var(--muted);
     font-weight: 500;
     white-space: nowrap;
+    position: sticky;
+    top: 0;
   }
   tbody tr {
     border-top: 1px solid var(--border);
     transition: background .1s;
   }
   tbody tr:hover { background: rgba(200,129,58,.06); }
-  td { padding: 11px 14px; vertical-align: middle; }
+  td { padding: 10px 12px; vertical-align: middle; }
 
-  .item-name { font-weight: 500; color: var(--text); }
+  .item-name { font-weight: 500; color: var(--text); font-size: 13px; }
   .item-cat {
     display: inline-block;
     font-size: 10px;
-    padding: 2px 8px;
+    padding: 2px 7px;
     border-radius: 20px;
     background: rgba(200,129,58,.15);
     color: var(--accent2);
     white-space: nowrap;
   }
 
-  /* status pill */
   .pill {
     display: inline-block;
-    padding: 3px 10px;
+    padding: 3px 9px;
     border-radius: 20px;
     font-size: 11px;
     font-weight: 600;
+    white-space: nowrap;
   }
   .pill-ok     { background: rgba(90,158,110,.15); color: var(--ok); }
   .pill-warn   { background: rgba(200,160,58,.15); color: var(--warn); }
   .pill-danger { background: rgba(200,90,58,.15);  color: var(--danger); }
 
   /* qty control */
-  .qty-ctrl { display: flex; align-items: center; gap: 6px; }
+  .qty-ctrl { display: flex; align-items: center; gap: 4px; }
   .qty-ctrl input {
-    width: 70px;
+    width: 58px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
-    padding: 5px 8px;
+    padding: 5px 6px;
     text-align: center;
     font-size: 14px;
     font-family: 'Inter', sans-serif;
@@ -218,26 +271,28 @@
   }
   .qty-ctrl input:focus { border-color: var(--accent); }
   .qty-btn {
-    width: 26px; height: 26px;
+    width: 30px; height: 30px;
     border-radius: 6px;
     border: 1px solid var(--border);
     background: var(--surface);
     color: var(--text);
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
+    font-size: 18px;
     transition: all .1s;
     font-family: 'Inter', sans-serif;
+    touch-action: manipulation;
+    flex-shrink: 0;
   }
-  .qty-btn:hover { background: var(--accent); border-color: var(--accent); }
+  .qty-btn:hover, .qty-btn:active { background: var(--accent); border-color: var(--accent); }
 
   .min-input {
-    width: 65px;
+    width: 58px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--muted);
-    padding: 5px 8px;
+    padding: 5px 6px;
     text-align: center;
     font-size: 13px;
     font-family: 'Inter', sans-serif;
@@ -247,33 +302,59 @@
 
   .check-col { cursor: pointer; accent-color: var(--accent); width: 16px; height: 16px; }
 
-  /* ── Modal ── */
+  /* ── Action buttons in table ── */
+  .td-actions { display: flex; gap: 4px; }
+  .td-actions .btn { padding: 5px 9px; font-size: 13px; min-height: 32px; }
+
+  /* ── Modal — fullscreen on mobile ── */
   .modal-overlay {
     display: none;
     position: fixed; inset: 0;
     background: rgba(0,0,0,.7);
     z-index: 200;
-    align-items: center;
+    align-items: flex-end;
     justify-content: center;
+  }
+  @media(min-width: 520px) {
+    .modal-overlay { align-items: center; }
   }
   .modal-overlay.open { display: flex; }
   .modal {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 28px;
-    width: 480px;
-    max-width: 95vw;
-    max-height: 90vh;
+    border-radius: 16px 16px 0 0;
+    padding: 24px 20px;
+    width: 100%;
+    max-width: 100%;
+    max-height: 92vh;
     overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
+  @media(min-width: 520px) {
+    .modal {
+      border-radius: 14px;
+      width: 480px;
+      max-width: 95vw;
+    }
+  }
+  /* Drag handle */
+  .modal-handle {
+    width: 40px; height: 4px;
+    background: var(--border);
+    border-radius: 4px;
+    margin: 0 auto 20px;
+    display: block;
+  }
+  @media(min-width: 520px) { .modal-handle { display: none; } }
+
   .modal h2 {
     font-family: 'Playfair Display', serif;
     font-size: 20px;
     color: var(--accent2);
-    margin-bottom: 20px;
+    margin-bottom: 18px;
   }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media(max-width: 380px) { .form-grid { grid-template-columns: 1fr; } }
   .form-group { display: flex; flex-direction: column; gap: 6px; }
   .form-group.full { grid-column: 1 / -1; }
   .form-group label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
@@ -282,84 +363,127 @@
     border: 1px solid var(--border);
     border-radius: 8px;
     color: var(--text);
-    padding: 9px 12px;
-    font-size: 14px;
+    padding: 10px 12px;
+    font-size: 16px; /* 16px prevents iOS zoom */
     font-family: 'Inter', sans-serif;
     outline: none;
+    min-height: 44px;
   }
   .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
   .form-group select option { background: var(--surface); }
 
-  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 22px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+  .modal-footer .btn { flex: 1; justify-content: center; min-height: 46px; font-size: 15px; }
 
   /* ── WhatsApp panel ── */
   .wa-panel {
     background: var(--card);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    padding: 20px;
-    margin-top: 24px;
+    padding: 18px 16px;
+    margin-top: 20px;
   }
   .wa-panel h3 {
     font-family: 'Playfair Display', serif;
     color: var(--accent2);
     margin-bottom: 14px;
-    font-size: 17px;
+    font-size: 16px;
     display: flex;
     align-items: center;
     gap: 8px;
   }
-  .wa-config { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 16px; }
-  .wa-config .form-group { flex: 1; min-width: 180px; }
+  .wa-config { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+  .wa-config .form-group input {
+    font-size: 16px; /* prevent iOS zoom */
+  }
   .wa-preview {
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 14px;
-    font-size: 13px;
+    padding: 12px;
+    font-size: 12px;
     line-height: 1.7;
     white-space: pre-wrap;
     color: var(--text);
     margin-bottom: 14px;
-    max-height: 220px;
+    max-height: 200px;
     overflow-y: auto;
     font-family: monospace;
+    -webkit-overflow-scrolling: touch;
   }
-  .wa-actions { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .wa-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .wa-actions .btn { justify-content: center; min-height: 46px; font-size: 14px; }
+  .wa-hint { color: var(--muted); font-size: 11px; text-align: center; margin-top: 6px; }
 
   /* ── Toasts ── */
   #toast {
     position: fixed;
-    bottom: 24px; right: 24px;
+    bottom: 20px; left: 50%; transform: translateX(-50%) translateY(10px);
     background: var(--ok);
     color: #fff;
-    padding: 12px 20px;
-    border-radius: 10px;
+    padding: 11px 20px;
+    border-radius: 24px;
     font-size: 13px;
     font-weight: 500;
     opacity: 0;
-    transform: translateY(10px);
     transition: all .25s;
     z-index: 999;
     pointer-events: none;
+    white-space: nowrap;
+    box-shadow: 0 4px 20px rgba(0,0,0,.4);
   }
-  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ── Empty state ── */
-  .empty { text-align: center; color: var(--muted); padding: 48px; font-size: 14px; }
+  .empty { text-align: center; color: var(--muted); padding: 40px 20px; font-size: 14px; }
 
-  /* ── Responsive ── */
-  @media(max-width: 768px) {
-    .stats { grid-template-columns: repeat(2,1fr); }
-    header { padding: 0 16px; }
-    .main { padding: 16px 12px; }
-    td, th { padding: 9px 10px; }
-    .logo span { display: none; }
+  /* ── Scroll hint on table ── */
+  .scroll-hint {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 6px 12px 0;
+    display: none;
   }
-  @media(max-width: 480px) {
-    .stats { grid-template-columns: 1fr 1fr; }
-    .form-grid { grid-template-columns: 1fr; }
+  @media(max-width: 700px) { .scroll-hint { display: block; } }
+
+  /* ── Fab (floating add button) on mobile ── */
+  .fab {
+    display: none;
+    position: fixed;
+    bottom: 24px; right: 20px;
+    width: 52px; height: 52px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    font-size: 26px;
+    cursor: pointer;
+    z-index: 150;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 16px rgba(200,129,58,.5);
+    touch-action: manipulation;
+    transition: transform .15s;
   }
+  .fab:active { transform: scale(.93); }
+  @media(max-width: 520px) {
+    .fab { display: flex; }
+    .header-add { display: none; }
+  }
+
+  /* ── Select faltantes row ── */
+  .toolbar-bottom {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+  }
+  .toolbar-bottom .btn { flex: 1; justify-content: center; min-height: 40px; font-size: 12px; }
 </style>
 </head>
 <body>
@@ -367,17 +491,20 @@
 <header>
   <div class="logo">☕ Café Moscu <span>Control de Stock</span></div>
   <div class="header-actions">
-    <button class="btn btn-ghost" onclick="exportCSV()">⬇ Exportar</button>
-    <button class="btn btn-primary" onclick="openAddModal()">+ Agregar</button>
+    <button class="btn btn-ghost btn-icon" onclick="exportCSV()" title="Exportar CSV">⬇</button>
+    <button class="btn btn-primary header-add" onclick="openAddModal()">+ Agregar</button>
   </div>
 </header>
+
+<!-- Floating add button (mobile only) -->
+<button class="fab" onclick="openAddModal()" aria-label="Agregar insumo">+</button>
 
 <div class="main">
 
   <!-- Stats -->
   <div class="stats">
     <div class="stat-card">
-      <div class="stat-label">Total insumos</div>
+      <div class="stat-label">Total</div>
       <div class="stat-value neutral" id="stat-total">0</div>
     </div>
     <div class="stat-card">
@@ -398,37 +525,49 @@
   <div class="toolbar">
     <div class="search-wrap">
       <span class="search-icon">🔍</span>
-      <input type="text" id="search" placeholder="Buscar insumo..." oninput="renderTable()">
+      <input type="text" id="search" placeholder="Buscar insumo..." oninput="renderTable()" autocomplete="off" autocorrect="off" spellcheck="false">
     </div>
     <select class="filter" id="filterStatus" onchange="renderTable()">
-      <option value="">Todos los estados</option>
-      <option value="ok">Stock OK</option>
-      <option value="low">Stock bajo</option>
+      <option value="">Todos</option>
+      <option value="ok">OK</option>
+      <option value="low">Bajo</option>
       <option value="zero">Sin stock</option>
     </select>
-    <button class="btn btn-ghost" onclick="toggleSelectFaltantes()">☑ Seleccionar faltantes</button>
   </div>
 
-  <!-- Category tabs -->
-  <div class="cat-tabs" id="catTabs"></div>
+  <!-- Select faltantes -->
+  <div class="toolbar-bottom">
+    <button class="btn btn-ghost" onclick="toggleSelectFaltantes()">☑ Seleccionar faltantes</button>
+    <button class="btn btn-ghost" onclick="generateMessage(); document.querySelector('.wa-panel').scrollIntoView({behavior:'smooth'})">📲 Generar pedido</button>
+  </div>
+
+  <!-- Category tabs (scrollable) -->
+  <div class="cat-tabs-wrap">
+    <div class="cat-tabs" id="catTabs"></div>
+  </div>
+
+  <!-- Scroll hint -->
+  <div class="scroll-hint">← deslizá la tabla →</div>
 
   <!-- Table -->
   <div class="table-wrap">
-    <table>
-      <thead>
-        <tr>
-          <th style="width:36px"><input type="checkbox" id="checkAll" onchange="toggleCheckAll(this)" style="accent-color:var(--accent);cursor:pointer;"></th>
-          <th>Insumo</th>
-          <th>Categoría</th>
-          <th>Stock actual</th>
-          <th>Mínimo</th>
-          <th>Unidad</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody"></tbody>
-    </table>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th style="width:32px"><input type="checkbox" id="checkAll" onchange="toggleCheckAll(this)" style="accent-color:var(--accent);cursor:pointer;"></th>
+            <th>Insumo</th>
+            <th>Categoría</th>
+            <th>Stock</th>
+            <th>Mín.</th>
+            <th>Unidad</th>
+            <th>Estado</th>
+            <th>Acc.</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
     <div class="empty" id="emptyMsg" style="display:none">No se encontraron insumos.</div>
   </div>
 
@@ -438,20 +577,20 @@
     <div class="wa-config">
       <div class="form-group">
         <label>Número del proveedor / encargado</label>
-        <input type="tel" id="waNumber" placeholder="+54 9 387 000-0000" value="">
+        <input type="tel" id="waNumber" placeholder="+54 9 387 000-0000" inputmode="tel">
       </div>
       <div class="form-group">
         <label>Nombre del local</label>
         <input type="text" id="waLocal" placeholder="Cafetería El Aroma" value="Moscu Cafe-Bar">
       </div>
-      <button class="btn btn-ghost" onclick="generateMessage()" style="margin-bottom:2px">🔄 Generar mensaje</button>
+      <button class="btn btn-ghost" onclick="generateMessage()" style="justify-content:center;min-height:44px">🔄 Generar mensaje</button>
     </div>
     <div class="wa-preview" id="waPreview">Presioná "Generar mensaje" para ver el pedido de insumos faltantes.</div>
     <div class="wa-actions">
       <button class="btn btn-wa" onclick="sendWhatsApp()">💬 Abrir WhatsApp</button>
-      <button class="btn btn-ghost" onclick="copyMessage()">📋 Copiar mensaje</button>
-      <span style="color:var(--muted);font-size:12px" id="waHint"></span>
+      <button class="btn btn-ghost" onclick="copyMessage()">📋 Copiar</button>
     </div>
+    <div class="wa-hint" id="waHint"></div>
   </div>
 
 </div>
@@ -459,11 +598,12 @@
 <!-- Add/Edit Modal -->
 <div class="modal-overlay" id="modalOverlay">
   <div class="modal">
+    <span class="modal-handle"></span>
     <h2 id="modalTitle">Agregar insumo</h2>
     <div class="form-grid">
       <div class="form-group full">
         <label>Nombre del insumo</label>
-        <input type="text" id="fName" placeholder="Ej: Café molido">
+        <input type="text" id="fName" placeholder="Ej: Café molido" autocomplete="off">
       </div>
       <div class="form-group">
         <label>Categoría</label>
@@ -487,11 +627,11 @@
       </div>
       <div class="form-group">
         <label>Stock actual</label>
-        <input type="number" id="fStock" placeholder="0" min="0">
+        <input type="number" id="fStock" placeholder="0" min="0" inputmode="decimal">
       </div>
       <div class="form-group">
         <label>Stock mínimo</label>
-        <input type="number" id="fMin" placeholder="0" min="0">
+        <input type="number" id="fMin" placeholder="0" min="0" inputmode="decimal">
       </div>
     </div>
     <div class="modal-footer">
@@ -504,145 +644,113 @@
 <div id="toast"></div>
 
 <script>
-// ── DATA ──────────────────────────────────────────────────────────────
 const CATEGORIES = [
-  "Café y derivados",
-  "Lácteos",
-  "Panadería y pastelería",
-  "Infusiones",
-  "Azúcar y edulcorantes",
-  "Siropes y toppings",
-  "Bebidas frías",
-  "Jugos y smoothies",
-  "Vasos y descartables",
-  "Packaging",
-  "Limpieza",
-  "Insumos de cocina",
-  "Snacks salados",
-  "Snacks dulces",
+  "Café y derivados","Lácteos","Panadería y pastelería","Infusiones",
+  "Azúcar y edulcorantes","Siropes y toppings","Bebidas frías","Jugos y smoothies",
+  "Vasos y descartables","Packaging","Limpieza","Insumos de cocina","Snacks salados","Snacks dulces",
 ];
 
 const DEFAULT_ITEMS = [
-  // Café
-  { name:"Bolsa de Cafe",      cat:"Café y derivados",        unit:"kg",       stock:5,   min:3  },
-  // Lácteos
-  { name:"Leche entera",                 cat:"Lácteos",                 unit:"L",        stock:12,  min:10 },
-  { name:"Leche Crema",             cat:"Lácteos",                 unit:"L",        stock:4,   min:5  },
-  { name:"Leche condensada",               cat:"Lácteos",                 unit:"L",        stock:2,   min:3  },
-  { name:"Leche de deslactosada",           cat:"Lácteos",                 unit:"L",        stock:1,   min:2  },
-  { name:"Leche Descremada",               cat:"Lácteos",                 unit:"L",        stock:3,   min:2  },
-  // Panadería
-  { name:"Medialunas",                   cat:"Panadería y pastelería",  unit:"docenas",  stock:3,   min:2  },
-  { name:"Criollitos",                      cat:"Panadería y pastelería",  unit:"unidades", stock:10,  min:12 },
-  { name:"Tostadas de pan lactal",       cat:"Panadería y pastelería",  unit:"paquetes", stock:4,   min:3  },
-  { name:"Pan de picada",                       cat:"Panadería y pastelería",  unit:"unidades", stock:0,   min:6  },
-  { name:"Crossaint",                  cat:"Panadería y pastelería",  unit:"kg",       stock:5,   min:5  },
-  { name:"Manteca",                      cat:"Panadería y pastelería",  unit:"kg",       stock:1,   min:2  },
-  // Infusiones
-  { name:"Té agua",                     cat:"Infusiones",              unit:"cajas",    stock:6,   min:4  },
-  { name:"Té tierra",                     cat:"Infusiones",              unit:"cajas",    stock:6,   min:4  },
-  { name:"Té Agua",                     cat:"Infusiones",              unit:"cajas",    stock:5,   min:4  },
-  { name:"Té fuego",             cat:"Infusiones",              unit:"cajas",    stock:2,   min:3  },
-  { name:"Chocolate temptetion",                   cat:"Infusiones",              unit:"kg",       stock:8,   min:5  },
-  { name:"Sweet",                     cat:"Infusiones",              unit:"cajas",    stock:6,   min:4  },
-  { name:"Blue dream",           cat:"Infusiones",              unit:"kg",       stock:2,   min:2  },
-  // Azúcar
-  { name:"Azúcar",               cat:"Azúcar y edulcorantes",   unit:"kg",       stock:7,   min:5  },
-  { name:"Azúcar individual",               cat:"Azúcar y edulcorantes",   unit:"kg",       stock:3,   min:2  },
-  { name:"Edulcorante",                       cat:"Azúcar y edulcorantes",   unit:"unidades", stock:100, min:80 },
-  // Siropes
-  { name:"Sirope de vainilla",           cat:"Siropes y toppings",      unit:"botellas", stock:4,   min:3  },
-  { name:"Sirope de caramelo",           cat:"Siropes y toppings",      unit:"botellas", stock:3,   min:3  },
-  { name:"Sirope de avellana",           cat:"Siropes y toppings",      unit:"botellas", stock:1,   min:2  },
-  { name:"Canela molida",                cat:"Siropes y toppings",      unit:"g",        stock:200, min:150},
-  { name:"Cacao en polvo",               cat:"Siropes y toppings",      unit:"kg",       stock:1,   min:1  },
-  // Bebidas
-  { name:"Agua mineral c/gas",           cat:"Bebidas frías",           unit:"botellas", stock:24,  min:20 },
-  { name:"Agua mineral s/gas",           cat:"Bebidas frías",           unit:"botellas", stock:30,  min:20 },
-  { name:"Agua mineral 2L c/gas",           cat:"Bebidas frías",           unit:"botellas", stock:24,  min:20 },
-  { name:"Agua mineral 2L s/gas",           cat:"Bebidas frías",           unit:"botellas", stock:30,  min:20 },
-  { name:"Gaseosas surtidas",            cat:"Bebidas frías",           unit:"unidades", stock:12,  min:18 },
-  // Jugos
-  { name:"Jugo de naranja natural",      cat:"Jugos y smoothies",       unit:"L",        stock:5,   min:4  },
-  { name:"Duranzo",               cat:"Jugos y smoothies",       unit:"kg",       stock:2,   min:2  },
-  { name:"Limon",                       cat:"Jugos y smoothies",       unit:"kg",       stock:3,   min:3  },
-  { name:"Banana",                       cat:"Jugos y smoothies",       unit:"kg",       stock:3,   min:3  },
-  // Descartables
-  { name:"Vasos cartón Grande",            cat:"Vasos y descartables",    unit:"unidades", stock:200, min:300},
-  { name:"Vasos cartón Mediano",             cat:"Vasos y descartables",    unit:"unidades", stock:150, min:200},
-  { name:"Tapas vasos",                  cat:"Vasos y descartables",    unit:"unidades", stock:180, min:200},
-  { name:"Vasos plástico frío",          cat:"Vasos y descartables",    unit:"unidades", stock:80,  min:100},
-  { name:"Sorbetes papel",               cat:"Vasos y descartables",    unit:"unidades", stock:50,  min:100},
-  // Packaging
-  { name:"Bolsas Camisa",                 cat:"Packaging",               unit:"unidades", stock:60,  min:50 },
-  { name:"Bolsas Carton",                 cat:"Packaging",               unit:"unidades", stock:60,  min:50 },
-
-  { name:"Servilletas",                  cat:"Packaging",               unit:"paquetes", stock:8,   min:6  },
-  { name:"Cucharitas descartables",      cat:"Packaging",               unit:"unidades", stock:120, min:150},
-  { name:"Cajas para torta",             cat:"Packaging",               unit:"unidades", stock:15,  min:20 },
-  // Limpieza
-  { name:"Detergente lavavajillas",      cat:"Limpieza",                unit:"L",        stock:4,   min:3  },
-  { name:"Desengrasante",                cat:"Limpieza",                unit:"L",        stock:2,   min:2  },
-  { name:"Esponjas",                     cat:"Limpieza",                unit:"unidades", stock:5,   min:6  },
-  { name:"Guantes de latex",             cat:"Limpieza",                unit:"unidades", stock:20,  min:20 },
-  // Cocina
-  { name:"Sal fina",                     cat:"Insumos de cocina",       unit:"kg",       stock:3,   min:2  },
-  { name:"Papel Manteca",            cat:"Insumos de cocina",       unit:"",        stock:5,   min:1  },
-  { name:"Huevos",                       cat:"Insumos de cocina",       unit:"docenas",  stock:5,   min:4  },
-  { name:"Queso crema",                  cat:"Insumos de cocina",       unit:"kg",       stock:2,   min:2  },
-  // Snacks
-  { name:"Galletitas surtidas",          cat:"Snacks dulces",           unit:"paquetes", stock:12,  min:10 },
-  { name:"Alfajores",                    cat:"Snacks dulces",           unit:"unidades", stock:18,  min:20 },
-  { name:"Chips",                cat:"Snacks salados",          unit:"unidades", stock:10,  min:12 },
-  { name:"Tostados Ternera",                       cat:"Snacks salados",          unit:"kg",       stock:2,   min:2  },
-  { name:"Tostados Salame",                       cat:"Snacks salados",          unit:"kg",       stock:2,   min:2  },
-  { name:"Tostados JyQ",                       cat:"Snacks salados",          unit:"kg",       stock:2,   min:2  },
+  { name:"Bolsa de Cafe",          cat:"Café y derivados",        unit:"kg",       stock:5,   min:3  },
+  { name:"Leche entera",           cat:"Lácteos",                 unit:"L",        stock:12,  min:10 },
+  { name:"Leche Crema",            cat:"Lácteos",                 unit:"L",        stock:4,   min:5  },
+  { name:"Leche condensada",       cat:"Lácteos",                 unit:"L",        stock:2,   min:3  },
+  { name:"Leche deslactosada",     cat:"Lácteos",                 unit:"L",        stock:1,   min:2  },
+  { name:"Leche Descremada",       cat:"Lácteos",                 unit:"L",        stock:3,   min:2  },
+  { name:"Medialunas",             cat:"Panadería y pastelería",  unit:"docenas",  stock:3,   min:2  },
+  { name:"Criollitos",             cat:"Panadería y pastelería",  unit:"unidades", stock:10,  min:12 },
+  { name:"Tostadas pan lactal",    cat:"Panadería y pastelería",  unit:"paquetes", stock:4,   min:3  },
+  { name:"Pan de picada",          cat:"Panadería y pastelería",  unit:"unidades", stock:0,   min:6  },
+  { name:"Croissant",              cat:"Panadería y pastelería",  unit:"kg",       stock:5,   min:5  },
+  { name:"Manteca",                cat:"Panadería y pastelería",  unit:"kg",       stock:1,   min:2  },
+  { name:"Té agua",                cat:"Infusiones",              unit:"cajas",    stock:6,   min:4  },
+  { name:"Té tierra",              cat:"Infusiones",              unit:"cajas",    stock:6,   min:4  },
+  { name:"Té fuego",               cat:"Infusiones",              unit:"cajas",    stock:2,   min:3  },
+  { name:"Chocolate temptation",   cat:"Infusiones",              unit:"kg",       stock:8,   min:5  },
+  { name:"Sweet",                  cat:"Infusiones",              unit:"cajas",    stock:6,   min:4  },
+  { name:"Blue dream",             cat:"Infusiones",              unit:"kg",       stock:2,   min:2  },
+  { name:"Azúcar",                 cat:"Azúcar y edulcorantes",   unit:"kg",       stock:7,   min:5  },
+  { name:"Azúcar individual",      cat:"Azúcar y edulcorantes",   unit:"kg",       stock:3,   min:2  },
+  { name:"Edulcorante",            cat:"Azúcar y edulcorantes",   unit:"unidades", stock:100, min:80 },
+  { name:"Sirope vainilla",        cat:"Siropes y toppings",      unit:"botellas", stock:4,   min:3  },
+  { name:"Sirope caramelo",        cat:"Siropes y toppings",      unit:"botellas", stock:3,   min:3  },
+  { name:"Sirope avellana",        cat:"Siropes y toppings",      unit:"botellas", stock:1,   min:2  },
+  { name:"Canela molida",          cat:"Siropes y toppings",      unit:"g",        stock:200, min:150},
+  { name:"Cacao en polvo",         cat:"Siropes y toppings",      unit:"kg",       stock:1,   min:1  },
+  { name:"Agua c/gas 500ml",       cat:"Bebidas frías",           unit:"botellas", stock:24,  min:20 },
+  { name:"Agua s/gas 500ml",       cat:"Bebidas frías",           unit:"botellas", stock:30,  min:20 },
+  { name:"Agua c/gas 2L",          cat:"Bebidas frías",           unit:"botellas", stock:24,  min:20 },
+  { name:"Agua s/gas 2L",          cat:"Bebidas frías",           unit:"botellas", stock:30,  min:20 },
+  { name:"Gaseosas surtidas",      cat:"Bebidas frías",           unit:"unidades", stock:12,  min:18 },
+  { name:"Jugo naranja natural",   cat:"Jugos y smoothies",       unit:"L",        stock:5,   min:4  },
+  { name:"Durazno",                cat:"Jugos y smoothies",       unit:"kg",       stock:2,   min:2  },
+  { name:"Limón",                  cat:"Jugos y smoothies",       unit:"kg",       stock:3,   min:3  },
+  { name:"Banana",                 cat:"Jugos y smoothies",       unit:"kg",       stock:3,   min:3  },
+  { name:"Vasos cartón Grande",    cat:"Vasos y descartables",    unit:"unidades", stock:200, min:300},
+  { name:"Vasos cartón Mediano",   cat:"Vasos y descartables",    unit:"unidades", stock:150, min:200},
+  { name:"Tapas vasos",            cat:"Vasos y descartables",    unit:"unidades", stock:180, min:200},
+  { name:"Vasos plástico frío",    cat:"Vasos y descartables",    unit:"unidades", stock:80,  min:100},
+  { name:"Sorbetes papel",         cat:"Vasos y descartables",    unit:"unidades", stock:50,  min:100},
+  { name:"Bolsas Camisa",          cat:"Packaging",               unit:"unidades", stock:60,  min:50 },
+  { name:"Bolsas Cartón",          cat:"Packaging",               unit:"unidades", stock:60,  min:50 },
+  { name:"Servilletas",            cat:"Packaging",               unit:"paquetes", stock:8,   min:6  },
+  { name:"Cucharitas descartables",cat:"Packaging",               unit:"unidades", stock:120, min:150},
+  { name:"Cajas para torta",       cat:"Packaging",               unit:"unidades", stock:15,  min:20 },
+  { name:"Detergente lavavajillas",cat:"Limpieza",                unit:"L",        stock:4,   min:3  },
+  { name:"Desengrasante",          cat:"Limpieza",                unit:"L",        stock:2,   min:2  },
+  { name:"Esponjas",               cat:"Limpieza",                unit:"unidades", stock:5,   min:6  },
+  { name:"Guantes de latex",       cat:"Limpieza",                unit:"unidades", stock:20,  min:20 },
+  { name:"Sal fina",               cat:"Insumos de cocina",       unit:"kg",       stock:3,   min:2  },
+  { name:"Papel Manteca",          cat:"Insumos de cocina",       unit:"",         stock:5,   min:1  },
+  { name:"Huevos",                 cat:"Insumos de cocina",       unit:"docenas",  stock:5,   min:4  },
+  { name:"Queso crema",            cat:"Insumos de cocina",       unit:"kg",       stock:2,   min:2  },
+  { name:"Galletitas surtidas",    cat:"Snacks dulces",           unit:"paquetes", stock:12,  min:10 },
+  { name:"Alfajores",              cat:"Snacks dulces",           unit:"unidades", stock:18,  min:20 },
+  { name:"Chips",                  cat:"Snacks salados",          unit:"unidades", stock:10,  min:12 },
+  { name:"Tostados Ternera",       cat:"Snacks salados",          unit:"kg",       stock:2,   min:2  },
+  { name:"Tostados Salame",        cat:"Snacks salados",          unit:"kg",       stock:2,   min:2  },
+  { name:"Tostados JyQ",           cat:"Snacks salados",          unit:"kg",       stock:2,   min:2  },
 ];
 
-// ── STATE ─────────────────────────────────────────────────────────────
-let items   = JSON.parse(localStorage.getItem('cafe_stock') || 'null') || DEFAULT_ITEMS.map((i,idx) => ({...i, id: idx+1, selected: false}));
-let nextId  = Math.max(...items.map(i=>i.id)) + 1;
-let editId  = null;
+let items  = JSON.parse(localStorage.getItem('cafe_stock') || 'null') || DEFAULT_ITEMS.map((i,idx) => ({...i, id: idx+1, selected: false}));
+let nextId = Math.max(...items.map(i=>i.id)) + 1;
+let editId = null;
 let activeCat = 'Todos';
 
 function save() { localStorage.setItem('cafe_stock', JSON.stringify(items)); }
 
-// ── STATUS ────────────────────────────────────────────────────────────
 function getStatus(item) {
   if (item.stock === 0) return 'zero';
   if (item.stock <= item.min) return 'low';
   return 'ok';
 }
-function statusLabel(s) {
-  return s === 'zero' ? 'Sin stock' : s === 'low' ? 'Stock bajo' : 'OK';
-}
+function statusLabel(s) { return s === 'zero' ? 'Sin stock' : s === 'low' ? 'Stock bajo' : 'OK'; }
 function statusPill(s) {
-  return `<span class="pill pill-${s === 'zero' ? 'danger' : s === 'low' ? 'warn' : 'ok'}">${statusLabel(s)}</span>`;
+  return `<span class="pill pill-${s==='zero'?'danger':s==='low'?'warn':'ok'}">${statusLabel(s)}</span>`;
 }
 
-// ── RENDER ────────────────────────────────────────────────────────────
 function renderCatTabs() {
   const cats = ['Todos', ...CATEGORIES];
-  const el = document.getElementById('catTabs');
-  el.innerHTML = cats.map(c => `<button class="cat-tab ${c===activeCat?'active':''}" onclick="setCategory('${c}')">${c}</button>`).join('');
+  document.getElementById('catTabs').innerHTML = cats.map(c =>
+    `<button class="cat-tab ${c===activeCat?'active':''}" onclick="setCategory('${c}')">${c}</button>`
+  ).join('');
 }
-
 function setCategory(cat) { activeCat = cat; renderCatTabs(); renderTable(); }
 
 function renderTable() {
-  const q   = document.getElementById('search').value.toLowerCase();
-  const st  = document.getElementById('filterStatus').value;
-  let data  = items.filter(i => {
+  const q  = document.getElementById('search').value.toLowerCase();
+  const st = document.getElementById('filterStatus').value;
+  let data = items.filter(i => {
     if (activeCat !== 'Todos' && i.cat !== activeCat) return false;
     if (q && !i.name.toLowerCase().includes(q)) return false;
-    if (st) { const s = getStatus(i); if (s !== st) return false; }
+    if (st) { if (getStatus(i) !== st) return false; }
     return true;
   });
 
   const tbody = document.getElementById('tableBody');
   const empty = document.getElementById('emptyMsg');
 
-  if (!data.length) { tbody.innerHTML = ''; empty.style.display=''; }
+  if (!data.length) { tbody.innerHTML = ''; empty.style.display = ''; }
   else {
     empty.style.display = 'none';
     tbody.innerHTML = data.map(i => {
@@ -654,16 +762,19 @@ function renderTable() {
         <td>
           <div class="qty-ctrl">
             <button class="qty-btn" onclick="adj(${i.id},-1)">−</button>
-            <input type="number" value="${i.stock}" min="0" onchange="setStock(${i.id}, this.value)" onblur="setStock(${i.id}, this.value)">
+            <input type="number" value="${i.stock}" min="0" inputmode="decimal"
+              onchange="setStock(${i.id}, this.value)" onblur="setStock(${i.id}, this.value)">
             <button class="qty-btn" onclick="adj(${i.id},+1)">+</button>
           </div>
         </td>
-        <td><input class="min-input" type="number" value="${i.min}" min="0" title="Mínimo" onchange="setMin(${i.id}, this.value)"></td>
-        <td style="color:var(--muted)">${i.unit}</td>
+        <td><input class="min-input" type="number" value="${i.min}" min="0" inputmode="decimal" title="Mínimo" onchange="setMin(${i.id}, this.value)"></td>
+        <td style="color:var(--muted);white-space:nowrap">${i.unit}</td>
         <td>${statusPill(s)}</td>
         <td>
-          <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px" onclick="openEditModal(${i.id})">✏</button>
-          <button class="btn btn-ghost" style="padding:5px 10px;font-size:12px;color:var(--danger)" onclick="deleteItem(${i.id})">🗑</button>
+          <div class="td-actions">
+            <button class="btn btn-ghost" onclick="openEditModal(${i.id})" title="Editar">✏</button>
+            <button class="btn btn-ghost" style="color:var(--danger)" onclick="deleteItem(${i.id})" title="Eliminar">🗑</button>
+          </div>
         </td>
       </tr>`;
     }).join('');
@@ -671,7 +782,6 @@ function renderTable() {
   updateStats();
 }
 
-// ── STATS ─────────────────────────────────────────────────────────────
 function updateStats() {
   document.getElementById('stat-total').textContent = items.length;
   document.getElementById('stat-ok').textContent    = items.filter(i=>getStatus(i)==='ok').length;
@@ -679,22 +789,18 @@ function updateStats() {
   document.getElementById('stat-zero').textContent  = items.filter(i=>getStatus(i)==='zero').length;
 }
 
-// ── ACTIONS ───────────────────────────────────────────────────────────
 function adj(id, delta) {
-  const i = items.find(x=>x.id===id);
-  if (!i) return;
+  const i = items.find(x=>x.id===id); if (!i) return;
   i.stock = Math.max(0, i.stock + delta);
   save(); renderTable();
 }
 function setStock(id, val) {
-  const i = items.find(x=>x.id===id);
-  if (!i) return;
+  const i = items.find(x=>x.id===id); if (!i) return;
   i.stock = Math.max(0, parseFloat(val)||0);
   save(); renderTable();
 }
 function setMin(id, val) {
-  const i = items.find(x=>x.id===id);
-  if (!i) return;
+  const i = items.find(x=>x.id===id); if (!i) return;
   i.min = Math.max(0, parseFloat(val)||0);
   save(); renderTable();
 }
@@ -710,14 +816,12 @@ function toggleSelectFaltantes() {
   items.forEach(i => i.selected = getStatus(i) !== 'ok');
   save(); renderTable(); toast('✅ Faltantes seleccionados');
 }
-
 function deleteItem(id) {
   if (!confirm('¿Eliminar este insumo?')) return;
   items = items.filter(x=>x.id!==id);
   save(); renderTable();
 }
 
-// ── MODAL ─────────────────────────────────────────────────────────────
 function openAddModal() {
   editId = null;
   document.getElementById('modalTitle').textContent = 'Agregar insumo';
@@ -725,8 +829,9 @@ function openAddModal() {
   document.getElementById('fStock').value = '';
   document.getElementById('fMin').value = '';
   document.getElementById('fUnit').value = 'kg';
-  fillCatSelect(); 
+  fillCatSelect();
   document.getElementById('modalOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('fName').focus(), 300);
 }
 function openEditModal(id) {
   editId = id;
@@ -751,10 +856,8 @@ function saveItem() {
   const stock = parseFloat(document.getElementById('fStock').value)||0;
   const min   = parseFloat(document.getElementById('fMin').value)||0;
   if (!name) { alert('Ingresá un nombre'); return; }
-
   if (editId) {
-    const i = items.find(x=>x.id===editId);
-    Object.assign(i, { name, cat, unit, stock, min });
+    Object.assign(items.find(x=>x.id===editId), { name, cat, unit, stock, min });
   } else {
     items.push({ id: nextId++, name, cat, unit, stock, min, selected: false });
   }
@@ -762,28 +865,19 @@ function saveItem() {
   toast(editId ? '✏ Insumo actualizado' : '✅ Insumo agregado');
 }
 
-// ── WHATSAPP ──────────────────────────────────────────────────────────
 function generateMessage() {
-  const local = document.getElementById('waLocal').value.trim() || 'Mi Cafetería';
+  const local    = document.getElementById('waLocal').value.trim() || 'Mi Cafetería';
   const selected = items.filter(i => i.selected);
-  const faltantes = items.filter(i => getStatus(i) !== 'ok');
-  const lista = selected.length ? selected : faltantes;
-
+  const faltantes= items.filter(i => getStatus(i) !== 'ok');
+  const lista    = selected.length ? selected : faltantes;
   if (!lista.length) {
     document.getElementById('waPreview').textContent = '✅ No hay insumos faltantes o seleccionados.';
     return;
   }
   const fecha = new Date().toLocaleDateString('es-AR', { day:'2-digit', month:'2-digit', year:'numeric' });
-  let msg = `📋 *PEDIDO DE INSUMOS — ${local.toUpperCase()}*\n`;
-  msg += `📅 Fecha: ${fecha}\n\n`;
-
-  // Group by category
+  let msg = `📋 *PEDIDO DE INSUMOS — ${local.toUpperCase()}*\n📅 Fecha: ${fecha}\n\n`;
   const groups = {};
-  lista.forEach(i => {
-    if (!groups[i.cat]) groups[i.cat] = [];
-    groups[i.cat].push(i);
-  });
-
+  lista.forEach(i => { if (!groups[i.cat]) groups[i.cat] = []; groups[i.cat].push(i); });
   for (const [cat, arr] of Object.entries(groups)) {
     msg += `*${cat}:*\n`;
     arr.forEach(i => {
@@ -791,8 +885,7 @@ function generateMessage() {
       const icon = s === 'zero' ? '🔴' : '🟡';
       const falta = Math.max(0, i.min - i.stock);
       msg += `  ${icon} ${i.name}`;
-      if (s === 'zero') msg += ` — SIN STOCK`;
-      else msg += ` — stock: ${i.stock} ${i.unit} (mínimo: ${i.min})`;
+      msg += s === 'zero' ? ` — SIN STOCK` : ` — stock: ${i.stock} ${i.unit} (mín: ${i.min})`;
       if (falta > 0) msg += ` → pedir: ${falta} ${i.unit}`;
       msg += `\n`;
     });
@@ -805,11 +898,10 @@ function generateMessage() {
 
 function sendWhatsApp() {
   const msg = document.getElementById('waPreview').textContent;
-  if (!msg || msg.startsWith('Presioná')) { generateMessage(); }
+  if (!msg || msg.startsWith('Presioná')) generateMessage();
   const num = document.getElementById('waNumber').value.replace(/\D/g,'');
   const encoded = encodeURIComponent(document.getElementById('waPreview').textContent);
-  const url = num ? `https://wa.me/${num}?text=${encoded}` : `https://wa.me/?text=${encoded}`;
-  window.open(url, '_blank');
+  window.open(num ? `https://wa.me/${num}?text=${encoded}` : `https://wa.me/?text=${encoded}`, '_blank');
 }
 
 function copyMessage() {
@@ -818,20 +910,17 @@ function copyMessage() {
   navigator.clipboard.writeText(msg).then(() => toast('📋 Mensaje copiado'));
 }
 
-// ── EXPORT ────────────────────────────────────────────────────────────
 function exportCSV() {
   const rows = [['Nombre','Categoría','Stock','Mínimo','Unidad','Estado']];
   items.forEach(i => rows.push([i.name, i.cat, i.stock, i.min, i.unit, statusLabel(getStatus(i))]));
   const csv = rows.map(r => r.map(c=>`"${c}"`).join(',')).join('\n');
-  const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
+  a.href = URL.createObjectURL(new Blob([csv], {type:'text/csv'}));
   a.download = `stock_cafeteria_${new Date().toISOString().slice(0,10)}.csv`;
   a.click();
   toast('⬇ CSV exportado');
 }
 
-// ── TOAST ─────────────────────────────────────────────────────────────
 function toast(msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -839,14 +928,12 @@ function toast(msg) {
   setTimeout(() => el.classList.remove('show'), 2500);
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────
-renderCatTabs();
-renderTable();
-
-// Close modal on overlay click
 document.getElementById('modalOverlay').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
 });
+
+renderCatTabs();
+renderTable();
 </script>
 </body>
 </html>
